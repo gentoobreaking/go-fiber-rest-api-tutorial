@@ -1,8 +1,8 @@
-module github.com/elliotforbes/go-fiber-tutorial
+module go-fiber-tutorial
 
-go 1.13
+go 1.14
 
 require (
-	github.com/gofiber/fiber v1.9.2
-	github.com/jinzhu/gorm v1.9.12
+	github.com/gofiber/fiber v1.14.6
+	github.com/jinzhu/gorm v1.9.16
 )

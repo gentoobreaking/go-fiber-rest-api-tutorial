@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/elliotforbes/go-fiber-tutorial/book"
-	"github.com/elliotforbes/go-fiber-tutorial/database"
+	//"github.com/elliotforbes/go-fiber-tutorial/book"
+	//"github.com/elliotforbes/go-fiber-tutorial/database"
+	"go-fiber-tutorial/book"
+	"go-fiber-tutorial/database"
 	"github.com/gofiber/fiber"
 
 	"github.com/jinzhu/gorm"

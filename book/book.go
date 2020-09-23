@@ -1,7 +1,8 @@
 package book
 
 import (
-	"github.com/elliotforbes/go-fiber-tutorial/database"
+	//"github.com/elliotforbes/go-fiber-tutorial/database"
+	"go-fiber-tutorial/database"
 	"github.com/gofiber/fiber"
 	"github.com/jinzhu/gorm"
 )
