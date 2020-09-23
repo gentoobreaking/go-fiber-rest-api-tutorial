@@ -3,19 +3,46 @@ RUN mkdir /build
 ADD . /build
 WORKDIR /build
 
+RUN apk update
 RUN apk add gcc libc-dev
+
+# Create appuser.
+ENV USER=appuser
+ENV UID=10001
+# See https://stackoverflow.com/a/55757473/12429735RUN
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    "${USER}"
+
 ## Add this go mod download command to pull in any dependencies
+ENV GO111MODULE=on
 RUN go mod download
+RUN go mod verify
+
 ## Our project will now successfully build with the necessary go libraries included.
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+#RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main
 
 FROM scratch
-#RUN adduser -S -D -H -h /app appuser
-#USER appuser
+# Import the user and group files from the builder.
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
+# Copy our static executable.
 COPY --from=builder /build/main /app/
 COPY --from=builder /build/books.db /
+
+# Use an unprivileged user.
+USER appuser:appuser
+
 WORKDIR /app
 ## Our start command which kicks off
 ## our newly created binary executable
-CMD ["./main"]
-###CMD ["/app/main"]
+CMD ["/app/main"]
+
+# --- END --- #
