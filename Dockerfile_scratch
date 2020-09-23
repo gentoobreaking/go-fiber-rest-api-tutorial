@@ -1,14 +1,14 @@
+############################
+# STEP 1 build executable binary
+############################
 FROM golang:alpine as builder
-RUN mkdir /build
-ADD . /build
-WORKDIR /build
 
-RUN apk update
-RUN apk add gcc libc-dev
+RUN apk update && apk add --no-cache gcc libc-dev
 
 # Create appuser.
 ENV USER=appuser
 ENV UID=10001
+
 # See https://stackoverflow.com/a/55757473/12429735RUN
 RUN adduser \
     --disabled-password \
@@ -19,6 +19,11 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
+#RUN mkdir /build
+#ADD . /build
+WORKDIR /build
+COPY . .
+
 ## Add this go mod download command to pull in any dependencies
 ENV GO111MODULE=on
 RUN go mod download
@@ -26,9 +31,16 @@ RUN go mod verify
 
 ## Our project will now successfully build with the necessary go libraries included.
 #RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main
+#RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o main
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -extldflags "-static"' -a -o main .
+
+############################
+# STEP 2 build a small image
+############################
 
 FROM scratch
+###COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+
 # Import the user and group files from the builder.
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
@@ -41,8 +53,12 @@ COPY --from=builder /build/books.db /
 USER appuser:appuser
 
 WORKDIR /app
+
+# Port on which the service will be exposed.
+EXPOSE 3000
+
 ## Our start command which kicks off
 ## our newly created binary executable
-CMD ["/app/main"]
-
+#CMD ["/app/main"]
+ENTRYPOINT ["/app/main"]
 # --- END --- #

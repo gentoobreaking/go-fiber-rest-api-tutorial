@@ -15,8 +15,8 @@ build:
 	go build
 
 docker:
-	#docker build --no-cache -t test:0.1 . -f Dockerfile_scratch
-	docker build -t test:0.1 . -f Dockerfile_alpine
+	docker build --no-cache -t test:0.1 . -f Dockerfile_scratch
+	#docker build -t test:0.1 . -f Dockerfile_alpine
 
 injecto:
 	docker run -it -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp joshwget/injecto test:0.1 005272e9f810
