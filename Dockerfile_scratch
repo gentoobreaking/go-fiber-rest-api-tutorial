@@ -1,0 +1,19 @@
+FROM golang:alpine as builder
+RUN mkdir /build
+ADD . /build
+WORKDIR /build
+## Add this go mod download command to pull in any dependencies
+RUN go mod download
+## Our project will now successfully build with the necessary go libraries included.
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
+
+FROM scratch
+#RUN adduser -S -D -H -h /app appuser
+#USER appuser
+COPY --from=builder /build/main /app/
+COPY --from=builder /build/books.db /app/
+WORKDIR /app
+## Our start command which kicks off
+## our newly created binary executable
+CMD ["./main"]
+###CMD ["/app/main"]

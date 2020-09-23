@@ -14,6 +14,10 @@ build:
 	go mod init go-fiber-tutorial # use local package
 	go build
 
+docker:
+	docker build -t test:0.1 . -f Dockerfile_scratch
+	#docker build -t test:0.1 . -f Dockerfile_alpine
+
 clean:
 	rm -f go-fiber-tutorial
 
